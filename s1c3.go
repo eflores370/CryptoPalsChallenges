@@ -33,7 +33,7 @@ func main(){
 		for j := range decoded {
 			decoded[j] ^= byte(i)
 		}
-		fmt.Println(i, string(decoded))
+		fmt.Println(i, string(i), string(decoded))
 	}
 	
 
