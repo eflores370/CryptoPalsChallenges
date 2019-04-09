@@ -35,6 +35,5 @@ func main(){
 		}
 		fmt.Println(i, string(i), string(decoded))
 	}
-	
 
 }
