@@ -4,7 +4,13 @@ import "fmt"
 import "strings"
 import "encoding/hex"
 
+type scores struct {
+	scoreResult float32
+	rawBytes []byte
+}
 
+
+// Peform XOR to byte array with single byte key
 func XOR(rawBytes[]byte, key byte) []byte  {	
 	for i := range rawBytes {
 		rawBytes[i] ^= key
@@ -12,7 +18,8 @@ func XOR(rawBytes[]byte, key byte) []byte  {
 	return rawBytes
 }
 
-func score(rawBytes[]byte) float32 {
+// Perform Frequency Analysis and give a score to byte array
+func score(rawBytes[]byte) scores {
 	englishFreq := map[string]float32{
 		"E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
 		"N": 6.75, "S": 6.33, "H": 6.09, "R": 5.99, "D": 4.25, "L": 4.03, 
@@ -21,6 +28,7 @@ func score(rawBytes[]byte) float32 {
 	 	"X": 0.15, "Q": 0.10, "Z": 0.07}
 
 	var totalScore float32
+
 	for i := range rawBytes {
 		points, exists := englishFreq[strings.ToUpper(string(rawBytes[i]))]
 		if exists {
@@ -28,11 +36,11 @@ func score(rawBytes[]byte) float32 {
 		} 
 	}
 
-	if ! (totalScore <= 0) {
-		fmt.Println(totalScore, string(rawBytes))	
-	}
-	
-	return totalScore
+	// if ! (totalScore <= 0) {
+	// 	// fmt.Println(totalScore, string(rawBytes))	
+	// }
+
+	return scores{scoreResult: totalScore, rawBytes: rawBytes}
 }
 
 func main(){
@@ -40,13 +48,18 @@ func main(){
 	// Input
 
 	const inputString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-	
 
+	scoreList := make([]scores, 0)
+
+
+
+	
+	// Brute force every character
 	for i := 0; i < 255; i++ {
 		rawBytes, _ := hex.DecodeString(inputString)
-		// fmt.Println(string(rawBytes))
 		result := XOR(rawBytes, byte(i))
-		// fmt.Println(string(result))
-		score(result)
+
+		scoreList = append(scoreList, score(result))
 	}
+	fmt.Println(scoreList)
 }	
