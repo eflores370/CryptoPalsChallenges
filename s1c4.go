@@ -1,7 +1,9 @@
 package main
 
+import "os"
 import "fmt"
 import "strings"
+import "bufio"
 import "encoding/hex"
 
 type scores struct {
@@ -43,6 +45,20 @@ func score(rawBytes[]byte) scores {
 	return scores{scoreResult: totalScore, rawBytes: rawBytes}
 }
 
+func readFile(path string) ([]string) {
+	file, _ := os.Open(path)
+	defer file.Close()
+
+	var lines []string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	return lines
+}
+
 func main(){
 	
 	// Input
@@ -50,16 +66,22 @@ func main(){
 	const inputString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
 	scoreList := make([]scores, 0)
+	lines := readFile("files/4.txt")
 
 
+	for line := range lines {
+		// Brute force every character
+		for i := 0; i < 255; i++ {
+			rawBytes, _ := hex.DecodeString(lines[line])
+			result := XOR(rawBytes, byte(i))
 
-	
-	// Brute force every character
-	for i := 0; i < 255; i++ {
-		rawBytes, _ := hex.DecodeString(inputString)
-		result := XOR(rawBytes, byte(i))
-
-		scoreList = append(scoreList, score(result))
+			scoreList = append(scoreList, score(result))
+		}
 	}
-	fmt.Println(scoreList)
+
+	// fmt.Println(scoreList)
+
+	for i := range scoreList {
+		fmt.Println(scoreList[i].scoreResult)
+	}
 }	
