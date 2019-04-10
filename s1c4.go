@@ -42,12 +42,13 @@ func score(decoded []byte) float32 {
 	return total
 }
 
-func XOR() {
+func XOR(decoded []byte) float32 {
 	for i := 0; i < 255; i++ {
-		decoded, _ := hex.DecodeString(s)
 		for j := range decoded {
 			decoded[j] ^= byte(i)
 		}
+	}
+	return score(decoded)
 }
 
 
@@ -64,15 +65,16 @@ func main() {
 	// 	// fmt.Println(string(decoded))
 	// 	score(decoded)
 	// }
+	var topScore float32
 
 	for i := range lines {
 		decoded,_ := hex.DecodeString(lines[i])
-		XOR := 
-		total := score(decoded)
-		fmt.Println(i, total)
+		newScore := XOR(decoded)
+		if topScore < newScore {
+			topScore = newScore
+			fmt.Println(topScore, string(decoded))
+		}
 		// fmt.Println(total, string(decoded))
 	}
-
-	// Answer
-	fmt.Println(string(lines[170]))
+	
 }
