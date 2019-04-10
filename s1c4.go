@@ -2,6 +2,7 @@ package main
 
 import "os"
 import "fmt"
+import "sort"
 import "strings"
 import "bufio"
 import "encoding/hex"
@@ -81,7 +82,12 @@ func main(){
 
 	// fmt.Println(scoreList)
 
+	// Sort
+
+	sort.Slice(scoreList, func(i, j int) bool { return scoreList[i].scoreResult < scoreList[j].scoreResult })
+
 	for i := range scoreList {
 		fmt.Println(scoreList[i].scoreResult)
+		fmt.Println(string(scoreList[i].rawBytes))
 	}
 }	
