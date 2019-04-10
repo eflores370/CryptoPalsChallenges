@@ -29,6 +29,16 @@ func readLines(path string) ([]string) {
 //  	"X": 0.15, "Q": 0.10, "Z": 0.07}
 // }
 
+func bruteForce(s string){
+	for i := 0; i < 255; i++ {
+		decoded, _ := hex.DecodeString(s)
+		for j := range decoded {
+			decoded[j] ^= byte(i)
+		}
+		fmt.Println(i, string(i), string(decoded))
+	}
+}
+
 
 func main() {
 
@@ -41,6 +51,8 @@ func main() {
 		// fmt.Println(lines[i])
 		decoded,_ := hex.DecodeString(lines[i])
 		fmt.Println(string(decoded))
+
+		bruteForce(lines[i])
 	}
 	
 }
