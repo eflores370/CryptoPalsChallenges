@@ -51,12 +51,10 @@ func findKeysize(byteArr []byte) {
 	for KEYSIZE := 2; KEYSIZE <= 40; KEYSIZE++ {
 		defer recoverloop()
 		fmt.Println("Keysize:", KEYSIZE)
-		fmt.Print(byteArr[:KEYSIZE])
-		fmt.Println(byteArr[KEYSIZE:KEYSIZE*2])
+		// fmt.Print(byteArr[:KEYSIZE])
+		// fmt.Println(byteArr[KEYSIZE:KEYSIZE*2])
 		fmt.Println("Hamming Distance:",(hammingDist(byteArr[:KEYSIZE],byteArr[KEYSIZE:KEYSIZE*2]))/KEYSIZE)
-
 	}
-
 }
 
 func readFile(path string) ([]string) {
@@ -75,8 +73,9 @@ func readFile(path string) ([]string) {
 
 func main() {
 
-	s := []byte("this is a test")
-	s1 := []byte("wokka wokka!!!")
+	// s := []byte("this is a test")
+	// s1 := []byte("wokka wokka!!!")
+	// fmt.Println(hammingDist(s,s1))
 
 	file := readFile("files/6.txt")
 
@@ -85,15 +84,15 @@ func main() {
 	for i := range file {
 		lines += file[i]
 	}
-
-	fmt.Println(lines)
-	fmt.Println(base64.StdEncoding.DecodeString(lines))
 	
 
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
+	// Keysize is probably 5
 	findKeysize(decoded)
 
 
-	fmt.Println(hammingDist(s,s1))
+
+
+	
 }
