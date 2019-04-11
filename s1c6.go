@@ -71,7 +71,7 @@ func readFile(path string) ([]string) {
 
 func main() {
 
-	s := "this is a test"
+	// s := "this is a test"
 	// s1 := "wokka wokka!!!"
 
 	file := readFile("files/6.txt")
@@ -88,7 +88,9 @@ func main() {
 
 	// fmt.Println(hammingDist(stringToBin(s),stringToBin(s1)))
 
-	findKEYSIZE(s)
+	a, _ := base64.StdEncoding.DecodeString(lines)
+
+	findKEYSIZE(a)
 
 	fmt.Println("HELLO")
 }
