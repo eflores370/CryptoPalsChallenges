@@ -3,7 +3,7 @@ package main
 import "os"
 import "fmt"
 import "bufio"
-// import "encoding/base64"
+import "encoding/base64"
 
 // Returns the Hamming distance of two strings
 // Input: Byte Array1 ([]byte), Byte Array2 ([]byte)
@@ -46,18 +46,19 @@ func recoverloop() {
 	}
 }
 
-// func findKEYSIZE(s string) {
+func findKEYSIZE(byteArr []byte) {
 	
 
-// 	for KEYSIZE := 2; KEYSIZE < 40; KEYSIZE++ {
-// 		defer recoverloop()
-// 		fmt.Println(stringToBin(s[:KEYSIZE]))
-// 		fmt.Println(stringToBin(s[KEYSIZE:KEYSIZE*2]))
-// 		fmt.Println(hammingDist(stringToBin(s[:KEYSIZE]),stringToBin(s[KEYSIZE:KEYSIZE*2]))/KEYSIZE)
+	for KEYSIZE := 2; KEYSIZE <= 40; KEYSIZE++ {
+		defer recoverloop()
+		fmt.Println("Keysize:", KEYSIZE)
+		fmt.Print(byteArr[:KEYSIZE])
+		fmt.Println(byteArr[KEYSIZE:KEYSIZE*2])
+		fmt.Println(hammingDist(byteArr[:KEYSIZE],byteArr[KEYSIZE:KEYSIZE*2]))
 
-// 	}
+	}
 
-// }
+}
 
 func readFile(path string) ([]string) {
 	file, _ := os.Open(path)
@@ -78,33 +79,24 @@ func main() {
 	s := []byte("this is a test")
 	s1 := []byte("wokka wokka!!!")
 
-	// file := readFile("files/6.txt")
+	file := readFile("files/6.txt")
 
-	// var lines string
+	var lines string
 
-	// for i := range file {
-	// 	lines += file[i]
-	// }
+	for i := range file {
+		lines += file[i]
+	}
 
-	// fmt.Println(lines)
-	// fmt.Println(base64.StdEncoding.DecodeString(lines))
+	fmt.Println(lines)
+	fmt.Println(base64.StdEncoding.DecodeString(lines))
 	
 
-	// fmt.Println(hammingDist(stringToBin(s),stringToBin(s1)))
+	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
-	// a, _ := base64.StdEncoding.DecodeString(lines)
-
-	// findKEYSIZE(s)
+	findKEYSIZE(decoded)
 
 	// fmt.Println("HELLO")
 
-	// hammingDist(byte)
-
-	fmt.Println(s)	
-
-	// fmt.Println(hammingDist(s,s1))
-
-	fmt.Println(ToBin(s))
 
 	fmt.Println(hammingDist(s,s1))
 }
