@@ -6,16 +6,16 @@ import "bufio"
 // import "encoding/base64"
 
 // Returns the Hamming distance of two strings
-// Input: Binary String 1 (String), Binary String 2 (String)
+// Input: Byte Array1 ([]byte), Byte Array2 ([]byte)
 // Output: Distance (int)
 
 func hammingDist(block1, block2 []byte) (distance int) {
 	
-	blockA := ToBin(block1)
-	blockB := ToBin(block2)
+	binBlock1 := ToBin(block1)
+	binBlock2 := ToBin(block2)
 
-	for i := range blockA {
-		if blockA[i] != blockB[i] {
+	for i := range binBlock1 {
+		if binBlock1[i] != binBlock2[i] {
 			distance++
 		}
 	}
@@ -24,25 +24,6 @@ func hammingDist(block1, block2 []byte) (distance int) {
 
 }
 
-
-// TO Remove
-// func retrieveUMask(byteArr []byte) (umask string) {
-
-// 	for i := range byteArr {
-// 		for j := 2; j < 255; j *= 2 {
-// 			fmt.Println(byteArr[i],j)
-// 			fmt.Println(byteArr[i] & byte(j) != 0)
-// 			if (byteArr[i] & byte(j) != 0){
-// 				umask += "0"	
-// 			} else {
-// 				umask += "1"
-// 			}
-// 		}
-// 	}
-// 	fmt.Println(umask)
-
-// 	return umask
-// }
 
 
 // Convert a byte array to a binary string
