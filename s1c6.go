@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+// Returns the Hamming distance of two strings
+// Input: Binary String 1 (String), Binary String 2 (String)
+// Output: Distance (int)
+
 func hammingDist(string1, string2 string) (distance int) {
 
 	for i := range string1 {
