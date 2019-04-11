@@ -33,13 +33,34 @@ func stringToBin(string1 string) (binary string) {
 
 }
 
-func main() {
+func recoverloop() {
+	if r := recover(); r != nil {
+		fmt.Println("Recovered from ", r)
+	}
+}
+
+func findKEYSIZE(s string) {
 	
-	// var KEYSIZE int;
+
+	for KEYSIZE := 2; KEYSIZE < 40; KEYSIZE++ {
+		defer recoverloop()
+		fmt.Println("\n\n",KEYSIZE)
+		fmt.Println(stringToBin(s[:KEYSIZE]))
+		fmt.Println(stringToBin(s[KEYSIZE:KEYSIZE*2]))
+		fmt.Println(hammingDist(stringToBin(s[:KEYSIZE]),stringToBin(s[KEYSIZE:KEYSIZE*2]))/KEYSIZE)
+
+	}
+
+}
+
+func main() {
 
 	s := "this is a test"
+	// s1 := "wokka wokka!!!"
 
-	s1 := "wokka wokka!!!"
+	// fmt.Println(hammingDist(stringToBin(s),stringToBin(s1)))
 
-	fmt.Println(hammingDist(stringToBin(s),stringToBin(s1)))
+	findKEYSIZE(s)
+
+	fmt.Println("HELLO")
 }
