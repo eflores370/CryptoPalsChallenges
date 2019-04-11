@@ -46,15 +46,14 @@ func recoverloop() {
 	}
 }
 
-func findKEYSIZE(byteArr []byte) {
+func findKeysize(byteArr []byte) {
 	
-
 	for KEYSIZE := 2; KEYSIZE <= 40; KEYSIZE++ {
 		defer recoverloop()
 		fmt.Println("Keysize:", KEYSIZE)
 		fmt.Print(byteArr[:KEYSIZE])
 		fmt.Println(byteArr[KEYSIZE:KEYSIZE*2])
-		fmt.Println(hammingDist(byteArr[:KEYSIZE],byteArr[KEYSIZE:KEYSIZE*2]))
+		fmt.Println("Hamming Distance:",(hammingDist(byteArr[:KEYSIZE],byteArr[KEYSIZE:KEYSIZE*2]))/KEYSIZE)
 
 	}
 
@@ -93,9 +92,7 @@ func main() {
 
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
-	findKEYSIZE(decoded)
-
-	// fmt.Println("HELLO")
+	findKeysize(decoded)
 
 
 	fmt.Println(hammingDist(s,s1))
