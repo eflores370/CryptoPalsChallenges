@@ -71,28 +71,48 @@ func readFile(path string) ([]string) {
 	return lines
 }
 
+func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {	
+
+		for i := 0; i < len(byteArr); i += Keysize {
+			
+			smallArry := make([]byte, 0)
+
+			for j := 0; j < Keysize; j++ {
+				
+				defer recoverloop()
+				smallArry = append(smallArry,byteArr[i+j])
+			}
+
+			cipherBlocks = append(cipherBlocks, smallArry)
+		}
+
+	return cipherBlocks
+}
+
 func main() {
+
+	var lines string
+	// var block [][]byte
+
 
 	// s := []byte("this is a test")
 	// s1 := []byte("wokka wokka!!!")
 	// fmt.Println(hammingDist(s,s1))
 
+
+	// Place lines from file into large byte array
 	file := readFile("files/6.txt")
-
-	var lines string
-
 	for i := range file {
 		lines += file[i]
 	}
-	
-
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
 	// Keysize is probably 5
-	findKeysize(decoded)
+	// findKeysize(decoded)
+
+	fmt.Println(decoded)
+
+	fmt.Println(breakCipherBlocks(decoded, 5))
 
 
-
-
-	
 }
