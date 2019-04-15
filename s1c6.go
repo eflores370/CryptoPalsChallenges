@@ -72,19 +72,26 @@ func readFile(path string) ([]string) {
 }
 
 func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {	
+		
+		// for i,v := range byteArr{
+		// 	if i % Keysize != 0 {
+		// 		continue
+		// 	}
+		// }
 
-		for i := 0; i < len(byteArr); i += Keysize {
-			
-			smallArry := make([]byte, 0)
+	for i := 0; i < len(byteArr); i += Keysize {
+		
+		smallArry := make([]byte, 0)
 
-			for j := 0; j < Keysize; j++ {
-				
-				defer recoverloop()
+		for j := 0; j < Keysize; j++ {
+
+			if (i+j < len(byteArr)) {
 				smallArry = append(smallArry,byteArr[i+j])
+				defer recoverloop()	
 			}
-
-			cipherBlocks = append(cipherBlocks, smallArry)
 		}
+		cipherBlocks = append(cipherBlocks, smallArry)
+	}	
 
 	return cipherBlocks
 }
@@ -110,9 +117,11 @@ func main() {
 	// Keysize is probably 5
 	// findKeysize(decoded)
 
-	fmt.Println(decoded)
+	// fmt.Println(decoded)
 
 	fmt.Println(breakCipherBlocks(decoded, 5))
+
+	fmt.Println(len(decoded))
 
 
 }
