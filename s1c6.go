@@ -97,18 +97,9 @@ func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 
 	for i := range Arr{
 		for j := range Arr[i] {
-			fmt.Println("Value:",Arr[i][j])
-			fmt.Println("Array:",j%Keysize)
 			Arr2[j%Keysize] = append(Arr2[j%Keysize], Arr[i][j])
 		}
-
-		//fmt.Println(i%Keysize)
-		////Arr2 = append(Arr2, tmpArray)
-		//Arr2[i%Keysize] = append(Arr2[i%Keysize], v)
-
-		//fmt.Println(i,v)
 	}
-	//fmt.Println(Arr2)
 	return Arr2
 }
 
@@ -130,8 +121,7 @@ func main() {
 
 	// Keysize is probably 5
 	//findKeysize(decoded)
-
-	fmt.Println(decoded)
+	
 	chunckedArry := breakCipherBlocks(decoded, 5)
 	ModifiedArray := transposeBlocks(chunckedArry, 5)
 
