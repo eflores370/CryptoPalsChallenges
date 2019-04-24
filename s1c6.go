@@ -10,7 +10,7 @@ import "encoding/base64"
 // Output: Distance (int)
 
 func hammingDist(block1, block2 []byte) (distance int) {
-	
+
 	binBlock1 := ToBin(block1)
 	binBlock2 := ToBin(block2)
 
@@ -23,8 +23,6 @@ func hammingDist(block1, block2 []byte) (distance int) {
 	return distance
 
 }
-
-
 
 // Convert a byte array to a binary string
 // Input: Byte Array ([]Byte)
@@ -47,17 +45,17 @@ func recoverloop() {
 }
 
 func findKeysize(byteArr []byte) {
-	
+
 	for KEYSIZE := 2; KEYSIZE <= 40; KEYSIZE++ {
 		defer recoverloop()
 		fmt.Println("Keysize:", KEYSIZE)
 		// fmt.Print(byteArr[:KEYSIZE])
 		// fmt.Println(byteArr[KEYSIZE:KEYSIZE*2])
-		fmt.Println("Hamming Distance:",(hammingDist(byteArr[:KEYSIZE],byteArr[KEYSIZE:KEYSIZE*2]))/KEYSIZE)
+		fmt.Println("Hamming Distance:", (hammingDist(byteArr[:KEYSIZE], byteArr[KEYSIZE:KEYSIZE*2]))/KEYSIZE)
 	}
 }
 
-func readFile(path string) ([]string) {
+func readFile(path string) []string {
 	file, _ := os.Open(path)
 	defer file.Close()
 
@@ -71,29 +69,40 @@ func readFile(path string) ([]string) {
 	return lines
 }
 
-func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {	
-		
-		// for i,v := range byteArr{
-		// 	if i % Keysize != 0 {
-		// 		continue
-		// 	}
-		// }
+// Convert large byte array into chunks of smaller byte array
+func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 
 	for i := 0; i < len(byteArr); i += Keysize {
-		
+
 		smallArry := make([]byte, 0)
 
 		for j := 0; j < Keysize; j++ {
 
-			if (i+j < len(byteArr)) {
-				smallArry = append(smallArry,byteArr[i+j])
-				defer recoverloop()	
+			if i+j < len(byteArr) {
+				smallArry = append(smallArry, byteArr[i+j])
+				defer recoverloop()
 			}
 		}
 		cipherBlocks = append(cipherBlocks, smallArry)
-	}	
+	}
 
 	return cipherBlocks
+}
+
+func transposeBlocks(Arr [][]byte) {
+	// for i := 0; i < len(Arr[0]); i++ {
+	// 	smallArry := make([][]byte, 0)
+	// 	for j := range Arr {
+	// 		Arr2 = append(Arr2, smallArry[i])
+	// 	}
+	// 	print(smallArry)
+	// }
+
+	// return Arr2
+
+	for i := range Arr {
+		fmt.Println(i)
+	}
 }
 
 func main() {
@@ -101,11 +110,9 @@ func main() {
 	var lines string
 	// var block [][]byte
 
-
 	// s := []byte("this is a test")
 	// s1 := []byte("wokka wokka!!!")
 	// fmt.Println(hammingDist(s,s1))
-
 
 	// Place lines from file into large byte array
 	file := readFile("files/6.txt")
@@ -118,10 +125,7 @@ func main() {
 	// findKeysize(decoded)
 
 	// fmt.Println(decoded)
-
-	fmt.Println(breakCipherBlocks(decoded, 5))
-
-	fmt.Println(len(decoded))
-
+	chuckedArry := breakCipherBlocks(decoded, 5)
+	transposeBlocks(chuckedArry)
 
 }
