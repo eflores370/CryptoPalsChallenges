@@ -89,20 +89,21 @@ func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 	return cipherBlocks
 }
 
-func transposeBlocks(Arr [][]byte) {
-	// for i := 0; i < len(Arr[0]); i++ {
-	// 	smallArry := make([][]byte, 0)
-	// 	for j := range Arr {
-	// 		Arr2 = append(Arr2, smallArry[i])
-	// 	}
-	// 	print(smallArry)
-	// }
+func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 
-	// return Arr2
-
-	for i := range Arr {
+	for i := 0; i < Keysize; i++ {
 		fmt.Println(i)
+		tmpArray := make([]byte, 0)
+		for j := 0; j < len(Arr); j++ {
+			//fmt.Println(Arr[j][i])
+			tmpArray = append(tmpArray, Arr[j][i])
+			defer recoverloop()
+		}
+		Arr2 = append(Arr2, tmpArray)
+
 	}
+
+	return Arr2
 }
 
 func main() {
@@ -122,10 +123,10 @@ func main() {
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
 	// Keysize is probably 5
-	// findKeysize(decoded)
+	//findKeysize(decoded)
 
 	// fmt.Println(decoded)
-	chuckedArry := breakCipherBlocks(decoded, 5)
-	transposeBlocks(chuckedArry)
+	chunckedArry := breakCipherBlocks(decoded, 5)
+	fmt.Println(transposeBlocks(chunckedArry, 5))
 
 }
