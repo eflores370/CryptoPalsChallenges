@@ -114,9 +114,11 @@ func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 
 func bruteforce(ByteArr[] byte) (scoreList[]scores) {
 
+
 	// Brute force every character
 	for i := 0; i < 255; i++ {
-		tmpByteArr := ByteArr
+		tmpByteArr := make([]byte, len(ByteArr))
+		copy(tmpByteArr, ByteArr)
 		result := XOR(tmpByteArr, byte(i))
 
 		scoreList = append(scoreList, score(result))
@@ -186,6 +188,7 @@ func main() {
 		for j := range scoreList {
 			fmt.Println(scoreList[j].scoreResult)
 			fmt.Println(scoreList[j].rawBytes)
+			fmt.Println(string(scoreList[j].rawBytes))
 		}
 	}
 }
