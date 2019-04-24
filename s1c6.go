@@ -1,9 +1,18 @@
 package main
 
-import "os"
+import (
+	"os"
+	"sort"
+	"strings"
+)
 import "fmt"
 import "bufio"
 import "encoding/base64"
+
+type scores struct {
+	scoreResult float32
+	rawBytes    []byte
+}
 
 // Returns the Hamming distance of two strings
 // Input: Byte Array1 ([]byte), Byte Array2 ([]byte)
@@ -103,6 +112,49 @@ func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 	return Arr2
 }
 
+func bruteforce(ByteArr[] byte) (scoreList[]scores) {
+
+	// Brute force every character
+	for i := 0; i < 255; i++ {
+		tmpByteArr := ByteArr
+		result := XOR(tmpByteArr, byte(i))
+
+		scoreList = append(scoreList, score(result))
+	}
+	return scoreList
+}
+
+func score(rawBytes []byte) scores {
+	englishFreq := map[string]float32{
+		"E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
+		"N": 6.75, "S": 6.33, "H": 6.09, "R": 5.99, "D": 4.25, "L": 4.03,
+		"C": 2.78, "U": 2.76, "M": 2.41, "W": 2.36, "F": 2.23, "G": 2.02,
+		"Y": 1.97, "P": 1.93, "B": 1.29, "V": 0.98, "K": 0.77, "J": 0.15,
+		"X": 0.15, "Q": 0.10, "Z": 0.07}
+
+	var totalScore float32
+
+	totalScore = 0
+
+	for i := range rawBytes {
+		points, exists := englishFreq[strings.ToUpper(string(rawBytes[i]))]
+		if exists {
+			totalScore += points
+		}
+	}
+
+	//fmt.Println(string(rawBytes), totalScore)
+
+	return scores{scoreResult: totalScore, rawBytes: rawBytes}
+}
+
+func XOR(rawBytes []byte, key byte) []byte {
+	for i := range rawBytes {
+		rawBytes[i] ^= key
+	}
+	return rawBytes
+}
+
 func main() {
 
 	var lines string
@@ -126,7 +178,14 @@ func main() {
 	ModifiedArray := transposeBlocks(chunckedArry, 5)
 
 	for i := range ModifiedArray{
-		fmt.Println(ModifiedArray[i])
-	}
+		//fmt.Println(ModifiedArray[i])
+		scoreList := bruteforce(ModifiedArray[i])
 
+		sort.Slice(scoreList, func(a, b int) bool { return scoreList[a].scoreResult < scoreList[b].scoreResult })
+
+		for j := range scoreList {
+			fmt.Println(scoreList[j].scoreResult)
+			fmt.Println(scoreList[j].rawBytes)
+		}
+	}
 }
