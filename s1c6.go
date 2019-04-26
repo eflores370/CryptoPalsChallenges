@@ -47,11 +47,16 @@ func ToBin(byteArr []byte) (binary string) {
 
 }
 
+// Recovers a loop from Runtime exceptions
+
 func recoverloop() {
 	if r := recover(); r != nil {
 		fmt.Println("Recovered from ", r)
 	}
 }
+
+// Determine the probable hamming distance for a given byte arry
+// Input: Byte Array ([]byte)
 
 func findKeysize(byteArr []byte) {
 
@@ -64,6 +69,9 @@ func findKeysize(byteArr []byte) {
 	}
 }
 
+// Parse a file and returns the contents
+// Input: File Path (String)
+// Output: Array of Strings ([]string)
 func readFile(path string) []string {
 	file, _ := os.Open(path)
 	defer file.Close()
@@ -78,7 +86,9 @@ func readFile(path string) []string {
 	return lines
 }
 
-// Convert large byte array into chunks of smaller byte array
+// Given a large array, split the array into smaller array with the maximum size of Keysize
+// Input: Large byte arr ([]byte) & Max length of array (int)
+// Output: A Large array containing smaller arrays ([][]byte)
 func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 
 	for i := 0; i < len(byteArr); i += Keysize {
@@ -98,6 +108,7 @@ func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 	return cipherBlocks
 }
 
+// Given a 2D array, create a new array
 func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 
 	for i := 0; i < Keysize; i++ {
@@ -126,6 +137,9 @@ func bruteforce(ByteArr[] byte) (scoreList[]scores) {
 	return scoreList
 }
 
+// Scoring function to determine if output is probable English
+// Input: Array of bytes ([]Byte)
+// Output: A score struct containing total points and a byte array ({int, []byte})
 func score(rawBytes []byte) scores {
 	englishFreq := map[string]float32{
 		"E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
@@ -150,12 +164,17 @@ func score(rawBytes []byte) scores {
 	return scores{scoreResult: totalScore, rawBytes: rawBytes}
 }
 
+// XOR a raw byte array with a given key
+// Input: Byte Array ([]byte) & Key ([]byte)
 func XOR(rawBytes []byte, key byte) []byte {
 	for i := range rawBytes {
 		rawBytes[i] ^= key
 	}
 	return rawBytes
 }
+
+
+// Vigenère cipher brute force
 
 func main() {
 
