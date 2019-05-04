@@ -112,10 +112,10 @@ func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 
 	for i := 0; i < Keysize; i++ {
-		Arr2 = append(Arr2,make([]byte, 0))
+		Arr2 = append(Arr2, make([]byte, 0))
 	}
 
-	for i := range Arr{
+	for i := range Arr {
 		for j := range Arr[i] {
 			Arr2[j%Keysize] = append(Arr2[j%Keysize], Arr[i][j])
 		}
@@ -123,8 +123,10 @@ func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 	return Arr2
 }
 
-func bruteforce(ByteArr[] byte) (scoreList[]scores) {
-
+// Brute force the XOR Key for a given Byte array and return a an array of scores
+// Input: Byte array ([]byte)
+// Output: Array of scores(struct) ([]{int,[]byte}
+func bruteForce(ByteArr []byte) (scoreList []scores) {
 
 	// Brute force every character
 	for i := 0; i < 255; i++ {
@@ -173,12 +175,31 @@ func XOR(rawBytes []byte, key byte) []byte {
 	return rawBytes
 }
 
+func rebuildString(finalArry []scores, Keysize int) {
+
+	//var Output string;
+
+	//for i := range finalArry {
+	//	fmt.Println(finalArry[i])
+	//}
+
+	//fmt.Println(i,rawBytes)
+	for i := 0; i < len(finalArry[0].rawBytes); i++ {
+		for j := 0; j < Keysize; j++ {
+			for _, v := range finalArry {
+				rawBytes := v.rawBytes
+				fmt.Print(rawBytes[j])
+			}
+		}
+	}
+}
 
 // Vigenère cipher brute force
 
 func main() {
 
 	var lines string
+	finalArry := make([]scores, 0)
 	// var block [][]byte
 
 	// s := []byte("this is a test")
@@ -194,20 +215,25 @@ func main() {
 
 	// Keysize is probably 5
 	//findKeysize(decoded)
-	
+
 	chunckedArry := breakCipherBlocks(decoded, 5)
 	ModifiedArray := transposeBlocks(chunckedArry, 5)
 
-	for i := range ModifiedArray{
-		//fmt.Println(ModifiedArray[i])
-		scoreList := bruteforce(ModifiedArray[i])
+	for i := range ModifiedArray {
+		scoreList := bruteForce(ModifiedArray[i])
 
 		sort.Slice(scoreList, func(a, b int) bool { return scoreList[a].scoreResult < scoreList[b].scoreResult })
 
-		for j := range scoreList {
-			fmt.Println(scoreList[j].scoreResult)
-			fmt.Println(scoreList[j].rawBytes)
-			fmt.Println(string(scoreList[j].rawBytes))
-		}
+		finalArry = append(finalArry, scoreList[len(scoreList)-1])
+
+		//for j := range scoreList {
+		//	fmt.Println(scoreList[j].scoreResult)
+		//fmt.Println(scoreList[j].rawBytes)
+		//fmt.Println(string(scoreList[j].rawBytes))
+		//}
 	}
+
+	//fmt.Println(finalArry)
+
+	rebuildString(finalArry, 5)
 }
