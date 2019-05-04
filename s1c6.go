@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"sort"
+	//"sort"
 	"strings"
 )
 import "fmt"
@@ -125,18 +125,18 @@ func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
 
 // Brute force the XOR Key for a given Byte array and return a an array of scores
 // Input: Byte array ([]byte)
-// Output: Array of scores(struct) ([]{int,[]byte}
-func bruteForce(ByteArr []byte) (scoreList []scores) {
+// Output: Array of byte arrays
+func bruteForce(ByteArr []byte) (XORByteArr [][]byte) {
 
 	// Brute force every character
 	for i := 0; i < 255; i++ {
 		tmpByteArr := make([]byte, len(ByteArr))
 		copy(tmpByteArr, ByteArr)
 		result := XOR(tmpByteArr, byte(i))
+		XORByteArr = append(XORByteArr, result)
 
-		scoreList = append(scoreList, score(result))
 	}
-	return scoreList
+	return XORByteArr
 }
 
 // Scoring function to determine if output is probable English
@@ -175,7 +175,7 @@ func XOR(rawBytes []byte, key byte) []byte {
 	return rawBytes
 }
 
-func rebuildString(finalArry []scores, Keysize int) {
+func rebuildString(finalArry []scores, Keysize int) (finalString []byte) {
 
 	//var Output string;
 
@@ -184,14 +184,19 @@ func rebuildString(finalArry []scores, Keysize int) {
 	//}
 
 	//fmt.Println(i,rawBytes)
-	for i := 0; i < len(finalArry[0].rawBytes); i++ {
-		for j := 0; j < Keysize; j++ {
+
+	for j := 0; j < Keysize; j++ {
+		for i := 0; i < len(finalArry[0].rawBytes); i++ {
 			for _, v := range finalArry {
 				rawBytes := v.rawBytes
-				fmt.Print(rawBytes[j])
+				//fmt.Print(rawBytes[j])
+				finalString = append(finalString, rawBytes[i])
+				defer recoverloop()
 			}
 		}
 	}
+
+	return finalString
 }
 
 // Vigenère cipher brute force
@@ -199,12 +204,8 @@ func rebuildString(finalArry []scores, Keysize int) {
 func main() {
 
 	var lines string
-	finalArry := make([]scores, 0)
-	// var block [][]byte
-
-	// s := []byte("this is a test")
-	// s1 := []byte("wokka wokka!!!")
-	// fmt.Println(hammingDist(s,s1))
+	modifiedArray := make([][]byte, 0)
+	tmpArr := make([][]byte, 5)
 
 	// Place lines from file into large byte array
 	file := readFile("files/6.txt")
@@ -217,23 +218,16 @@ func main() {
 	//findKeysize(decoded)
 
 	chunckedArry := breakCipherBlocks(decoded, 5)
-	ModifiedArray := transposeBlocks(chunckedArry, 5)
+	transposedArray := transposeBlocks(chunckedArry, 5)
 
-	for i := range ModifiedArray {
-		scoreList := bruteForce(ModifiedArray[i])
-
-		sort.Slice(scoreList, func(a, b int) bool { return scoreList[a].scoreResult < scoreList[b].scoreResult })
-
-		finalArry = append(finalArry, scoreList[len(scoreList)-1])
-
-		//for j := range scoreList {
-		//	fmt.Println(scoreList[j].scoreResult)
-		//fmt.Println(scoreList[j].rawBytes)
-		//fmt.Println(string(scoreList[j].rawBytes))
-		//}
+	for i := range transposedArray {
+		tmpArr[i] = bruteForce(transposedArray[i])
+		modifiedArray = append(modifiedArray, tmpArr[i])
 	}
 
-	//fmt.Println(finalArry)
+	fmt.Println(transposedArray)
 
-	rebuildString(finalArry, 5)
+
+	//fmt.Println(rebuildString(finalArry, 5))
+	//fmt.Println(string(rebuildString(finalArry, 5)))
 }
