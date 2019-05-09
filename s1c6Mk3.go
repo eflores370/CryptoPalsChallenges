@@ -5,7 +5,14 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"strings"
 )
+
+type scores struct {
+	scoreResult float32
+	rawBytes    []byte
+	key         int
+}
 
 // ReadFile
 // Parse a file and returns the contents
@@ -99,6 +106,75 @@ func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 	return cipherBlocks
 }
 
+// Given a 2D array, create a new array
+func transposeBlocks(Arr [][]byte, Keysize int) (Arr2 [][]byte) {
+
+	for i := 0; i < Keysize; i++ {
+		Arr2 = append(Arr2, make([]byte, 0))
+	}
+
+	for i := range Arr {
+		for j := range Arr[i] {
+			Arr2[j%Keysize] = append(Arr2[j%Keysize], Arr[i][j])
+		}
+	}
+	return Arr2
+}
+
+// XOR a raw byte array with a given key
+// Input: Byte Array ([]byte) & Key ([]byte)
+func XOR(rawBytes []byte, key byte) []byte {
+	for i := range rawBytes {
+		rawBytes[i] ^= key
+	}
+	return rawBytes
+}
+
+// Scoring function to determine if output is probable English
+// Input: Array of bytes ([]Byte)
+// Output: A score struct containing total points and a byte array ({int, []byte})
+func score(rawBytes []byte, value int) scores {
+	englishFreq := map[string]float32{
+		"E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
+		"N": 6.75, "S": 6.33, "H": 6.09, "R": 5.99, "D": 4.25, "L": 4.03,
+		"C": 2.78, "U": 2.76, "M": 2.41, "W": 2.36, "F": 2.23, "G": 2.02,
+		"Y": 1.97, "P": 1.93, "B": 1.29, "V": 0.98, "K": 0.77, "J": 0.15,
+		"X": 0.15, "Q": 0.10, "Z": 0.07}
+
+	var totalScore float32
+
+	totalScore = 0
+
+	for i := range rawBytes {
+		points, exists := englishFreq[strings.ToUpper(string(rawBytes[i]))]
+		if exists {
+			totalScore += points
+		}
+	}
+
+	fmt.Println(rawBytes, totalScore, value)
+
+	return scores{scoreResult: totalScore, rawBytes: rawBytes, key: value}
+}
+
+// Brute force the XOR Key for a given Byte array and return a an array of scores
+// Input: Byte array ([]byte)
+// Output: Array of byte arrays
+func bruteForce(ByteArr []byte) (XORByteArr [][]byte) {
+
+	// Brute force every character
+	for i := 0; i < 255; i++ {
+		tmpByteArr := make([]byte, len(ByteArr))
+		copy(tmpByteArr, ByteArr)
+		result := XOR(tmpByteArr, byte(i))
+		//fmt.Println(result)
+		score(result, i)
+		XORByteArr = append(XORByteArr, result)
+
+	}
+	return XORByteArr
+}
+
 func main() {
 
 	var lines string
@@ -112,7 +188,11 @@ func main() {
 
 	keysize := findKeySize(2, 42, decoded)
 
-	fmt.Println(keysize)
-	fmt.Println(breakCipherBlocks(decoded, keysize))
+	splitArray := breakCipherBlocks(decoded, keysize)
+	ModifiedArray := transposeBlocks(splitArray, keysize)
+
+	for i := range ModifiedArray {
+		bruteForce(ModifiedArray[i])
+	}
 
 }
