@@ -60,24 +60,44 @@ func hammingDist(block1, block2 []byte) (distance float32) {
 }
 
 // FindKeySize
-func findKeySize(initial, final int, byteArr []byte) (shortestDist float32) {
+func findKeySize(initial, final int, byteArr []byte) (keysize int) {
 
-	shortestDist = 255
+	var shortestDist float32 = 255
 	for KEYSIZE := initial; KEYSIZE <= final; KEYSIZE++ {
 		//defer recoverloop()
 
-		currentDist := float32(hammingDist(byteArr[:KEYSIZE], byteArr[KEYSIZE:KEYSIZE*2]))/float32(KEYSIZE)
+		currentDist := float32(hammingDist(byteArr[:KEYSIZE], byteArr[KEYSIZE:KEYSIZE*2])) / float32(KEYSIZE)
 		if currentDist < shortestDist {
 			shortestDist = currentDist
+			keysize = KEYSIZE
 			//fmt.Println("Keysize:", KEYSIZE, "Hamming Distance", shortestDist)
 		}
 	}
 
-	return  shortestDist
+	return keysize
 }
 
+// Given a large array, split the array into smaller array with the maximum size of Keysize
+// Input: Large byte arr ([]byte) & Max length of array (int)
+// Output: A Large array containing smaller arrays ([][]byte)
+func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 
+	for i := 0; i < len(byteArr); i += Keysize {
 
+		smallArry := make([]byte, 0)
+
+		for j := 0; j < Keysize; j++ {
+
+			if i+j < len(byteArr) {
+				smallArry = append(smallArry, byteArr[i+j])
+				//defer recoverloop()
+			}
+		}
+		cipherBlocks = append(cipherBlocks, smallArry)
+	}
+
+	return cipherBlocks
+}
 
 func main() {
 
@@ -90,6 +110,9 @@ func main() {
 	}
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
-	findKeySize(2,42, decoded)
+	keysize := findKeySize(2, 42, decoded)
+
+	fmt.Println(keysize)
+	fmt.Println(breakCipherBlocks(decoded, keysize))
 
 }
