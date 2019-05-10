@@ -211,6 +211,7 @@ func main() {
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
 	keysize := findKeySize(2, 42, decoded)
+	//keysize := 29
 
 	splitArray := breakCipherBlocks(decoded, keysize)
 	ModifiedArray := transposeBlocks(splitArray, keysize)
@@ -221,7 +222,7 @@ func main() {
 		finalArray = append(finalArray, tmpArray[len(tmpArray)-1])
 	}
 
-	fmt.Println(rebuildString(finalArray, keysize))
+	//fmt.Println(rebuildString(finalArray, keysize))
 	fmt.Println(string(rebuildString(finalArray, keysize)))
 
 }
