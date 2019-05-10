@@ -71,14 +71,29 @@ func hammingDist(block1, block2 []byte) (distance float32) {
 func findKeySize(initial, final int, byteArr []byte) (keysize int) {
 
 	var shortestDist float32 = 255
+
 	for KEYSIZE := initial; KEYSIZE <= final; KEYSIZE++ {
 		//defer recoverloop()
 
-		currentDist := float32(hammingDist(byteArr[:KEYSIZE], byteArr[KEYSIZE:KEYSIZE*2])) / float32(KEYSIZE)
+		tmpArr := breakCipherBlocks(byteArr, KEYSIZE)
+		var total float32 = 0
+
+		distances := make([]float32, 0)
+		for i := range tmpArr {
+			if i+2 < len(tmpArr) {
+				distances = append(distances, hammingDist(tmpArr[i], tmpArr[i+1])/float32(KEYSIZE))
+			}
+		}
+
+		for i := range distances {
+			total += distances[i]
+		}
+
+		currentDist := float32(total / float32(len(distances)))
+
 		if currentDist < shortestDist {
 			shortestDist = currentDist
 			keysize = KEYSIZE
-			//fmt.Println("Keysize:", KEYSIZE, "Hamming Distance", shortestDist)
 		}
 	}
 
@@ -211,7 +226,6 @@ func main() {
 	decoded, _ := base64.StdEncoding.DecodeString(lines)
 
 	keysize := findKeySize(2, 42, decoded)
-	//keysize := 29
 
 	splitArray := breakCipherBlocks(decoded, keysize)
 	ModifiedArray := transposeBlocks(splitArray, keysize)
@@ -224,5 +238,6 @@ func main() {
 
 	//fmt.Println(rebuildString(finalArray, keysize))
 	fmt.Println(string(rebuildString(finalArray, keysize)))
+	//rebuildString(finalArray, keysize)
 
 }
