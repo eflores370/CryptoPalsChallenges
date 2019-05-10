@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -152,7 +153,7 @@ func score(rawBytes []byte, value int) scores {
 		}
 	}
 
-	fmt.Println(rawBytes, totalScore, value)
+	//fmt.Println(rawBytes, totalScore, value)
 
 	return scores{scoreResult: totalScore, rawBytes: rawBytes, key: value}
 }
@@ -160,24 +161,47 @@ func score(rawBytes []byte, value int) scores {
 // Brute force the XOR Key for a given Byte array and return a an array of scores
 // Input: Byte array ([]byte)
 // Output: Array of byte arrays
-func bruteForce(ByteArr []byte) (XORByteArr [][]byte) {
+func bruteForce(ByteArr []byte) (XORByteArr []scores) {
 
 	// Brute force every character
 	for i := 0; i < 255; i++ {
 		tmpByteArr := make([]byte, len(ByteArr))
 		copy(tmpByteArr, ByteArr)
 		result := XOR(tmpByteArr, byte(i))
-		//fmt.Println(result)
-		score(result, i)
-		XORByteArr = append(XORByteArr, result)
+		XORByteArr = append(XORByteArr, score(result, i))
 
 	}
 	return XORByteArr
 }
 
+// Recovers a loop from Runtime exceptions
+
+func recoverloop() {
+	if r := recover(); r != nil {
+		fmt.Println("Recovered from ", r)
+	}
+}
+
+func rebuildString(finalArry []scores, Keysize int) (finalString []byte) {
+
+	for j := 0; j < Keysize; j++ {
+		for i := 0; i < len(finalArry[0].rawBytes); i++ {
+			for _, v := range finalArry {
+				rawBytes := v.rawBytes
+				finalString = append(finalString, rawBytes[i])
+				defer recoverloop()
+			}
+		}
+	}
+
+	return finalString
+}
+
 func main() {
 
 	var lines string
+	//scoreList := make([][]byte, 0)
+	finalArray := make([]scores, 0)
 
 	// Read file and base 64 decode
 	file := readFile("files/6.txt")
@@ -192,7 +216,12 @@ func main() {
 	ModifiedArray := transposeBlocks(splitArray, keysize)
 
 	for i := range ModifiedArray {
-		bruteForce(ModifiedArray[i])
+		tmpArray := bruteForce(ModifiedArray[i])
+		sort.Slice(tmpArray, func(a, b int) bool { return tmpArray[a].scoreResult < tmpArray[b].scoreResult })
+		finalArray = append(finalArray, tmpArray[len(tmpArray)-1])
 	}
+
+	fmt.Println(rebuildString(finalArray, keysize))
+	fmt.Println(string(rebuildString(finalArray, keysize)))
 
 }

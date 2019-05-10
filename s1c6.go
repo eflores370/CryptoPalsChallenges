@@ -223,10 +223,10 @@ func main() {
 	for i := range transposedArray {
 		tmpArr[i] = bruteForce(transposedArray[i])
 		modifiedArray = append(modifiedArray, tmpArr[i])
+
 	}
 
 	fmt.Println(transposedArray)
-
 
 	//fmt.Println(rebuildString(finalArry, 5))
 	//fmt.Println(string(rebuildString(finalArry, 5)))
