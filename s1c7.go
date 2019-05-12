@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/aes"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -31,10 +32,25 @@ func readFile(path string) (decoded []byte) {
 	return decoded
 }
 
+func decryptAES128ECB(ciphertext, key []byte) (plaintext []byte) {
+	cipher,_ := aes.NewCipher(key)
+	plaintext = make([]byte, len(ciphertext))
+	size := 16
+
+	for blockStart,blockEnd:= 0, size; blockStart < len(ciphertext); blockStart, blockEnd = blockStart+size, blockEnd+size {
+		cipher.Decrypt(plaintext[blockStart:blockEnd], ciphertext[blockStart:blockEnd])
+	}
+
+	return plaintext
+}
+
 func main() {
 
-	const key = "YELLOW SUBMARINE"
+	key := []byte("YELLOW SUBMARINE")
+	decoded := readFile("files/7.txt")
 
-	fmt.Println(string(readFile("files/7.txt")))
+	plaintext := decryptAES128ECB(decoded, key)
+
+	fmt.Println(string(plaintext))
 
 }
