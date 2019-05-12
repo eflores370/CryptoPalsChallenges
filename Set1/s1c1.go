@@ -4,7 +4,7 @@ import "fmt"
 import "encoding/hex"
 import "encoding/base64"
 
-// Convert Hex to Base64
+// Convert hex to base64
 
 func main() {
 

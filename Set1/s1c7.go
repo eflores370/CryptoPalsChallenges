@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// AES in ECB mode
+
 // ReadFile
 // Parse a file and returns the contents
 // Input: File Path (String)

@@ -7,6 +7,8 @@ import "strings"
 import "bufio"
 import "encoding/hex"
 
+// Detect single-character XOR
+
 type scores struct {
 	scoreResult float32
 	rawBytes    []byte

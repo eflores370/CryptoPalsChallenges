@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// Break repeating-key XOR
+
 type scores struct {
 	scoreResult float32
 	rawBytes    []byte
