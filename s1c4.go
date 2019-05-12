@@ -23,7 +23,7 @@ func XOR(rawBytes []byte, key byte) []byte {
 // Perform Frequency Analysis and give a score to byte array
 func score(rawBytes []byte) scores {
 	englishFreq := map[string]float32{
-		"E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
+		" ": 15, "E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
 		"N": 6.75, "S": 6.33, "H": 6.09, "R": 5.99, "D": 4.25, "L": 4.03,
 		"C": 2.78, "U": 2.76, "M": 2.41, "W": 2.36, "F": 2.23, "G": 2.02,
 		"Y": 1.97, "P": 1.93, "B": 1.29, "V": 0.98, "K": 0.77, "J": 0.15,
@@ -39,7 +39,7 @@ func score(rawBytes []byte) scores {
 	}
 
 	// if ! (totalScore <= 0) {
-	// 	// fmt.Println(totalScore, string(rawBytes))	
+	// 	// fmt.Println(totalScore, string(rawBytes))
 	// }
 
 	return scores{scoreResult: totalScore, rawBytes: rawBytes}

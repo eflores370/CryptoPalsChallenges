@@ -73,7 +73,6 @@ func findKeySize(initial, final int, byteArr []byte) (keysize int) {
 	var shortestDist float32 = 255
 
 	for KEYSIZE := initial; KEYSIZE <= final; KEYSIZE++ {
-		//defer recoverloop()
 
 		tmpArr := breakCipherBlocks(byteArr, KEYSIZE)
 		var total float32 = 0
@@ -113,7 +112,6 @@ func breakCipherBlocks(byteArr []byte, Keysize int) (cipherBlocks [][]byte) {
 
 			if i+j < len(byteArr) {
 				smallArry = append(smallArry, byteArr[i+j])
-				//defer recoverloop()
 			}
 		}
 		cipherBlocks = append(cipherBlocks, smallArry)
@@ -151,7 +149,7 @@ func XOR(rawBytes []byte, key byte) []byte {
 // Output: A score struct containing total points and a byte array ({int, []byte})
 func score(rawBytes []byte, value int) scores {
 	englishFreq := map[string]float32{
-		"E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
+		" ": 15, "E": 12.70, "T": 9.06, "A": 8.17, "O": 7.51, "I": 6.97,
 		"N": 6.75, "S": 6.33, "H": 6.09, "R": 5.99, "D": 4.25, "L": 4.03,
 		"C": 2.78, "U": 2.76, "M": 2.41, "W": 2.36, "F": 2.23, "G": 2.02,
 		"Y": 1.97, "P": 1.93, "B": 1.29, "V": 0.98, "K": 0.77, "J": 0.15,
@@ -167,8 +165,6 @@ func score(rawBytes []byte, value int) scores {
 			totalScore += points
 		}
 	}
-
-	//fmt.Println(rawBytes, totalScore, value)
 
 	return scores{scoreResult: totalScore, rawBytes: rawBytes, key: value}
 }
@@ -236,7 +232,6 @@ func main() {
 		finalArray = append(finalArray, tmpArray[len(tmpArray)-1])
 	}
 
-	//fmt.Println(rebuildString(finalArray, keysize))
 	fmt.Println(string(rebuildString(finalArray, keysize)))
 
 	// Key
@@ -244,6 +239,5 @@ func main() {
 	for i := range finalArray {
 		fmt.Print(string(finalArray[i].key))
 	}
-	//rebuildString(finalArray, keysize)
 
 }
