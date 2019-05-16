@@ -6,9 +6,9 @@ import (
 
 // Implement PKCS#7 padding
 
-func padding(unpaddedText string, totalLength int) {
+func padding(unpaddedText string, totalLength int) (bytes []byte) {
 
-	bytes := []byte(unpaddedText)
+	bytes = []byte(unpaddedText)
 	fmt.Println(bytes)
 
 	padValue := totalLength - (len(unpaddedText) % totalLength)
@@ -18,11 +18,11 @@ func padding(unpaddedText string, totalLength int) {
 		bytes = append(bytes, byte(padValue))
 	}
 
-	fmt.Println(bytes)
+	return bytes
 }
 
 func main() {
 	const s = "YELLOW SUBMARINE"
-	padding(s, 20)
-	fmt.Println(string(s))
+	paddedText := padding(s, 20)
+	fmt.Println(string(paddedText))
 }
