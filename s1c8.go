@@ -10,7 +10,6 @@ import (
 
 // Detect AES in ECB mode
 
-
 func readFile(path string) []string {
 	file, _ := os.Open(path)
 	defer file.Close()
@@ -24,7 +23,6 @@ func readFile(path string) []string {
 
 	return lines
 }
-
 
 func detectECB(ciphertext []byte) (counter int) {
 	size := 16

@@ -35,11 +35,11 @@ func readFile(path string) (decoded []byte) {
 }
 
 func decryptAES128ECB(ciphertext, key []byte) (plaintext []byte) {
-	cipher,_ := aes.NewCipher(key)
+	cipher, _ := aes.NewCipher(key)
 	plaintext = make([]byte, len(ciphertext))
 	size := 16
 
-	for blockStart,blockEnd:= 0, size; blockStart < len(ciphertext); blockStart, blockEnd = blockStart+size, blockEnd+size {
+	for blockStart, blockEnd := 0, size; blockStart < len(ciphertext); blockStart, blockEnd = blockStart+size, blockEnd+size {
 		cipher.Decrypt(plaintext[blockStart:blockEnd], ciphertext[blockStart:blockEnd])
 	}
 

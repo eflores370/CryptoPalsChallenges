@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
 // AES CBC Encryption/Decryption
@@ -54,8 +53,7 @@ func decryptCBC(rawBytes, iv, key []byte) (plaintext []byte) {
 }
 
 func main() {
-	path, _ := filepath.Abs("../files/10.txt")
-	decoded := readFile(path)
+	decoded := readFile("files/10.txt")
 	iv := []byte("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
 	key := []byte("YELLOW SUBMARINE")
 
