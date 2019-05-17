@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// AES CBC Encryption/Decryption
+// Implement CBC mode
 
 func readFile(path string) (decoded []byte) {
 	file, _ := os.Open(path)
