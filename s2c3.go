@@ -57,15 +57,37 @@ func CBCEncryption(plaintext, key []byte) (ciphertext []byte) {
 	return ciphertext
 }
 
+func padding(unpaddedBytes []byte, totalLength int) (bytes []byte) {
+
+	bytes = unpaddedBytes
+
+	padValue := totalLength - (len(unpaddedBytes) % totalLength)
+
+	for i := 0; i < padValue; i++ {
+		bytes = append(bytes, byte(padValue))
+	}
+
+	return bytes
+}
+
 func encryption_oracle(plaintext, key []byte) (ciphertext []byte) {
 
 	random.Seed(time.Now().UTC().UnixNano())
+
+	// Append 5 random bytes before & after
+	tmpArray := generateRandomBytes(random.Intn(11-5) + 5)
+	plaintext = append(tmpArray, plaintext...)
+	plaintext = append(plaintext, generateRandomBytes(random.Intn(11-5)+5)...)
+
+	// Add padding
+	paddedText := padding(plaintext, 16)
+
 	if random.Intn(100)%2 == 0 {
 		//ECB
-		ciphertext = ECBEncryption(plaintext, key)
+		ciphertext = ECBEncryption(paddedText, key)
 	} else {
 		//CBC
-		ciphertext = CBCEncryption(plaintext, key)
+		ciphertext = CBCEncryption(paddedText, key)
 	}
 
 	return ciphertext

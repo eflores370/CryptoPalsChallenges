@@ -6,12 +6,11 @@ import (
 
 // Implement PKCS#7 padding
 
-func padding(unpaddedText string, totalLength int) (bytes []byte) {
+func padding(unpaddedBytes []byte, totalLength int) (bytes []byte) {
 
-	bytes = []byte(unpaddedText)
-	fmt.Println(bytes)
+	bytes = unpaddedBytes
 
-	padValue := totalLength - (len(unpaddedText) % totalLength)
+	padValue := totalLength - (len(unpaddedBytes) % totalLength)
 	fmt.Println(padValue)
 
 	for i := 0; i < padValue; i++ {
@@ -22,7 +21,7 @@ func padding(unpaddedText string, totalLength int) (bytes []byte) {
 }
 
 func main() {
-	const s = "YELLOW SUBMARINE"
+	s := []byte("YELLOW SUBMARINE")
 	paddedText := padding(s, 20)
 	fmt.Println(string(paddedText))
 }
