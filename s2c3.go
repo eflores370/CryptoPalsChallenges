@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"fmt"
 	random "math/rand"
+	"reflect"
+	"strings"
 	"time"
 )
 
@@ -70,6 +72,27 @@ func padding(unpaddedBytes []byte, totalLength int) (bytes []byte) {
 	return bytes
 }
 
+func detectECB(ciphertext []byte) (counter int) {
+	size := 16
+
+	cipherBlocks := make([][]byte, 0)
+
+	for blockStart, blockEnd := 0, size; blockStart < len(ciphertext); blockStart, blockEnd = blockStart+size, blockEnd+size {
+		if len(cipherBlocks) == 0 {
+			cipherBlocks = append(cipherBlocks, ciphertext[blockStart:blockEnd])
+			continue
+		}
+		for i := range cipherBlocks {
+			if reflect.DeepEqual(cipherBlocks[i], ciphertext[blockStart:blockEnd]) {
+				counter++
+			} else {
+				cipherBlocks = append(cipherBlocks, ciphertext[blockStart:blockEnd])
+			}
+		}
+	}
+	return counter
+}
+
 func encryption_oracle(plaintext, key []byte) (ciphertext []byte) {
 
 	random.Seed(time.Now().UTC().UnixNano())
@@ -90,17 +113,20 @@ func encryption_oracle(plaintext, key []byte) (ciphertext []byte) {
 		ciphertext = CBCEncryption(paddedText, key)
 	}
 
-	return ciphertext
+	if detectECB(ciphertext) > 0 {
+		fmt.Println("ECB Detected")
+		return ciphertext
+	} else {
+		fmt.Println("CBC Detected")
+		return ciphertext
+	}
 }
 
 func main() {
 
-	Plaintext := []byte("12345678123456781234567812345678")
+	input := strings.Repeat("A", 100)
 
 	key := generateRandomBytes(16)
-	encrypted := encryption_oracle(Plaintext, key)
-	fmt.Println(encrypted)
-	fmt.Println(len(encrypted))
-	fmt.Println(string(encrypted))
+	fmt.Println(encryption_oracle([]byte(input), key))
 
 }
