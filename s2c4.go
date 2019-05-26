@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"reflect"
 	"strings"
 	//"strings"
 )
@@ -68,7 +69,6 @@ func discoverBlockSize(decoded, key []byte) int {
 	for i := 0; i < 50; i++ {
 		input := strings.Repeat("A", i)
 		encryptedString := oracle(input, decoded, key)
-		fmt.Println(len(encryptedString))
 		currentSize = len(encryptedString)
 		if i != 0 {
 			if currentSize != previousSize {
@@ -87,14 +87,43 @@ func discoverBlockSize(decoded, key []byte) int {
 
 }
 
+func countRepeatingBlocks(ciphertext, key []byte) (counter int) {
+	size := discoverBlockSize(ciphertext, key)
+
+	cipherBlocks := make([][]byte, 0)
+
+	for blockStart, blockEnd := 0, size; blockStart < len(ciphertext); blockStart, blockEnd = blockStart+size, blockEnd+size {
+		if len(cipherBlocks) == 0 {
+			cipherBlocks = append(cipherBlocks, ciphertext[blockStart:blockEnd])
+			continue
+		}
+		for i := range cipherBlocks {
+			if reflect.DeepEqual(cipherBlocks[i], ciphertext[blockStart:blockEnd]) {
+				counter++
+			} else {
+				cipherBlocks = append(cipherBlocks, ciphertext[blockStart:blockEnd])
+			}
+		}
+	}
+	return counter
+}
+
+func isECB(rawBytes, key []byte) bool {
+	encryptedString := ECBEncryption(rawBytes, key)
+	if countRepeatingBlocks(encryptedString, key) > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 func main() {
 
 	key := generateRandomBytes(16)
 	const secret = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
 	decoded, _ := base64.StdEncoding.DecodeString(secret)
 
-	fmt.Print("blocksize ", discoverBlockSize(decoded, key))
-
-	//s := ECBEncryption(padding(decoded, 16),key)
+	fmt.Print("blocksize", discoverBlockSize(decoded, key))
+	fmt.Print(isECB(padding(decoded, 16), key))
 
 }
