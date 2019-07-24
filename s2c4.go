@@ -28,22 +28,35 @@ func XOR(rawBytes []byte, key []byte) []byte {
 }
 
 
-func AES_128_CBC_Encrypt(plaintext string, key []byte) (ciphertext []byte) {
-	paddedPlainText := padding([]byte(plaintext), 16)
+//func AES_128_CBC_Encrypt(plaintext string, key []byte) (ciphertext []byte) {
+//	paddedPlainText := padding([]byte(plaintext), aes.Blocksize)
+//	ciphertext = make([]byte, len(paddedPlainText))
+//
+//	cipher, _ := aes.NewCipher(key)
+//	//iv := generateRandomBytes(16)
+//	iv := []byte("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15")
+//
+//	for blockstart := 0; blockstart < len(plaintext); blockstart += aes.BlockSize {
+//		blockend := blockstart + aes.BlockSize
+//		copy(paddedPlainText[blockstart:blockend],XOR(paddedPlainText[blockstart:blockend], iv))
+//		cipher.Encrypt(ciphertext[blockstart:blockend], paddedPlainText[blockstart:blockend])
+//		iv = ciphertext[blockstart:blockend]
+//	}
+//	return ciphertext
+//
+//}
+
+func AES_128_ECB_Encrypt(plaintext string, key []byte) (ciphertext []byte){
+	paddedPlainText := padding([]byte(plaintext), aes.BlockSize)
 	ciphertext = make([]byte, len(paddedPlainText))
 
 	cipher, _ := aes.NewCipher(key)
-	//iv := generateRandomBytes(16)
-	iv := []byte("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-
 	for blockstart := 0; blockstart < len(plaintext); blockstart += aes.BlockSize {
 		blockend := blockstart + aes.BlockSize
-		copy(paddedPlainText[blockstart:blockend],XOR(paddedPlainText[blockstart:blockend], iv))
 		cipher.Encrypt(ciphertext[blockstart:blockend], paddedPlainText[blockstart:blockend])
-		iv = ciphertext[blockstart:blockend]
 	}
-	return ciphertext
 
+	return ciphertext
 }
 
 func generateRandomBytes(length int) (key []byte) {
@@ -68,6 +81,6 @@ func main(){
 	decodedString,_ := base64.StdEncoding.DecodeString(unknownString)
 
 	combinedString := myString + string(decodedString)
-
-	fmt.Println(base64.StdEncoding.EncodeToString(AES_128_CBC_Encrypt(combinedString, key)))
+	cipherText := AES_128_ECB_Encrypt(combinedString, key)
+	fmt.Println(base64.StdEncoding.EncodeToString(cipherText))
 }
