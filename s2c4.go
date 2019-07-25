@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"strings"
 )
 
@@ -87,20 +88,50 @@ func detectBlockSize(ciphertext, key []byte) (length int) {
 	return 0
 }
 
+func detectECB(cipherText, key []byte, blocksize int) bool {
+
+	counter := 0
+	cipherBlocks := make([][]byte, 0)
+
+	for blockStart := 0; blockStart < len(cipherText); blockStart += blocksize {
+		blockEnd := blockStart + blocksize
+		if len(cipherBlocks) == 0 {
+			cipherBlocks = append(cipherBlocks, cipherText[blockStart:blockEnd])
+			continue
+		}
+		for i := range cipherBlocks {
+			if reflect.DeepEqual(cipherBlocks[i], cipherText[blockStart:blockEnd]) {
+				counter++
+			} else {
+				cipherBlocks = append(cipherBlocks, cipherText[blockStart:blockEnd])
+			}
+		}
+	}
+
+	if counter > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 // Byte-at-a-time ECB decryption (Simple)
 func main(){
 	//key := generateRandomBytes(16)
 	key := []byte("YELLOW SUBMARINE")
 	unknownString := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
-	//myString := "AAAA"
+	//unknownString := "UEFTU1dPUkRERUFEQkVFRlBBU1NXT1JEREVBREJFRUY="
 
 	// Decode string and append it to controlled string
 	decodedString,_ := base64.StdEncoding.DecodeString(unknownString)
-	//combinedString := myString + string(decodedString)
+
 	// Encryption Setup
 	cipherText := AES_128_ECB_Encrypt(decodedString, key)
 	fmt.Println(base64.StdEncoding.EncodeToString(cipherText))
+	fmt.Println(cipherText)
 
 	// Detect Blocksize of the encryption
-	fmt.Println(detectBlockSize(cipherText, key))
+	blockSize := detectBlockSize(cipherText, key)
+
+	fmt.Println(detectECB(cipherText, key, blockSize))
 }
