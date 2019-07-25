@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 func padding(unpaddedBytes []byte, totalLength int) (bytes []byte) {
@@ -46,7 +47,7 @@ func XOR(rawBytes []byte, key []byte) []byte {
 //
 //}
 
-func AES_128_ECB_Encrypt(plaintext string, key []byte) (ciphertext []byte){
+func AES_128_ECB_Encrypt(plaintext, key []byte) (ciphertext []byte){
 	paddedPlainText := padding([]byte(plaintext), aes.BlockSize)
 	ciphertext = make([]byte, len(paddedPlainText))
 
@@ -71,16 +72,35 @@ func generateRandomBytes(length int) (key []byte) {
 	return key
 }
 
+func detectBlockSize(ciphertext, key []byte) (length int) {
+	currentBlockSize := len(AES_128_ECB_Encrypt(ciphertext, key))
+	for i := 0; i < 50; i++ {
+		stringA := strings.Repeat("A", i)
+		tmpArray := make([]byte, 0)
+		tmpArray = append(tmpArray,  stringA...)
+		tmpArray = append(tmpArray,  ciphertext...)
+		if currentBlockSize != len(AES_128_ECB_Encrypt(tmpArray, key)){
+			return len(AES_128_ECB_Encrypt(tmpArray, key)) - currentBlockSize
+		}
+
+	}
+	return 0
+}
+
 // Byte-at-a-time ECB decryption (Simple)
 func main(){
 	//key := generateRandomBytes(16)
 	key := []byte("YELLOW SUBMARINE")
 	unknownString := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
-	myString := "AAAA"
+	//myString := "AAAA"
 
+	// Decode string and append it to controlled string
 	decodedString,_ := base64.StdEncoding.DecodeString(unknownString)
-
-	combinedString := myString + string(decodedString)
-	cipherText := AES_128_ECB_Encrypt(combinedString, key)
+	//combinedString := myString + string(decodedString)
+	// Encryption Setup
+	cipherText := AES_128_ECB_Encrypt(decodedString, key)
 	fmt.Println(base64.StdEncoding.EncodeToString(cipherText))
+
+	// Detect Blocksize of the encryption
+	fmt.Println(detectBlockSize(cipherText, key))
 }
