@@ -48,12 +48,13 @@ func XOR(rawBytes []byte, key []byte) []byte {
 //
 //}
 
+
 func AES_128_ECB_Encrypt(plaintext, key []byte) (ciphertext []byte){
 	paddedPlainText := padding([]byte(plaintext), aes.BlockSize)
 	ciphertext = make([]byte, len(paddedPlainText))
 
 	cipher, _ := aes.NewCipher(key)
-	for blockstart := 0; blockstart < len(plaintext); blockstart += aes.BlockSize {
+	for blockstart := 0; blockstart < len(paddedPlainText); blockstart += aes.BlockSize {
 		blockend := blockstart + aes.BlockSize
 		cipher.Encrypt(ciphertext[blockstart:blockend], paddedPlainText[blockstart:blockend])
 	}
@@ -116,8 +117,15 @@ func detectECB(cipherText, key []byte, blocksize int) bool {
 }
 
 func encryptionOracle(ciphertext, key []byte, blocksize int){
-	controlledString := strings.Repeat("A", blocksize - 1)
-	AES_128_ECB_Encrypt(ciphertext)
+	lookupTable := make(map[string][]byte)
+	for i := 0; i < 255; i++ {
+		controlledString := strings.Repeat("A", blocksize - 1)
+		controlledString += string(i)
+		encryptedString := AES_128_ECB_Encrypt([]byte(controlledString), key)
+		lookupTable[string(i)] = encryptedString
+		fmt.Println(lookupTable[string(i)])
+	}
+	//AES_128_ECB_Encrypt(ciphertext)
 }
 
 // Byte-at-a-time ECB decryption (Simple)
@@ -137,8 +145,9 @@ func main(){
 
 	// Detect Blocksize of the encryption
 	blockSize := detectBlockSize(cipherText, key)
+	fmt.Println(blockSize)
 
 	fmt.Println(detectECB(cipherText, key, blockSize))
 
-	encryptionOracle()
+	encryptionOracle(cipherText, key, blockSize)
 }
