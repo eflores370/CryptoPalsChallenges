@@ -116,16 +116,42 @@ func detectECB(cipherText, key []byte, blocksize int) bool {
 	}
 }
 
-func encryptionOracle(ciphertext, key []byte, blocksize int){
-	lookupTable := make(map[string][]byte)
+func encryptionOracle(decodedString, key []byte, blocksize int) (plaintext string) {
+	lookupTable := make(map[int][]byte)
+
 	for i := 0; i < 255; i++ {
 		controlledString := strings.Repeat("A", blocksize - 1)
 		controlledString += string(i)
 		encryptedString := AES_128_ECB_Encrypt([]byte(controlledString), key)
-		lookupTable[string(i)] = encryptedString
-		fmt.Println(lookupTable[string(i)])
+		lookupTable[i] = encryptedString
 	}
-	//AES_128_ECB_Encrypt(ciphertext)
+
+	//for blockStart := 0; blockStart < len(ciphertext); blockStart += blocksize {
+	//	blockEnd := blockStart + blocksize
+	//	currentBlock := ciphertext[blockStart:blockEnd]
+	//	for keyA, value := range lookupTable {
+	//		fmt.Println(currentBlock,value[0:16], string(keyA))
+	//		if reflect.DeepEqual(currentBlock,value[0:16]) {
+	//			fmt.Print("!!!!!" + string(key))
+	//		}
+	//	}
+	//}
+	fmt.Println(lookupTable)
+	fmt.Println(decodedString)
+	for i := range decodedString {
+		controlledString := strings.Repeat("A", blocksize - 1)
+		controlledString += string(decodedString[i])
+		encryptedString := AES_128_ECB_Encrypt([]byte(controlledString), key)
+		for index, value := range lookupTable {
+			//fmt.Println(encryptedString[0:blocksize], value[0:blocksize])
+			if reflect.DeepEqual(encryptedString[0:blocksize], value[0:blocksize]) {
+				plaintext += string(index)
+			}
+		}
+	}
+
+	return plaintext
+
 }
 
 // Byte-at-a-time ECB decryption (Simple)
@@ -140,14 +166,15 @@ func main(){
 
 	// Encryption Setup
 	cipherText := AES_128_ECB_Encrypt(decodedString, key)
-	fmt.Println(base64.StdEncoding.EncodeToString(cipherText))
-	fmt.Println(cipherText)
+	//fmt.Println(base64.StdEncoding.EncodeToString(cipherText))
+	//fmt.Println(cipherText)
 
 	// Detect Blocksize of the encryption
 	blockSize := detectBlockSize(cipherText, key)
-	fmt.Println(blockSize)
+	//fmt.Println(blockSize)
 
-	fmt.Println(detectECB(cipherText, key, blockSize))
+	//fmt.Println(detectECB(cipherText, key, blockSize))
 
-	encryptionOracle(cipherText, key, blockSize)
+	plaintext := encryptionOracle(decodedString, key, blockSize)
+	fmt.Println(plaintext)
 }
