@@ -115,6 +115,11 @@ func detectECB(cipherText, key []byte, blocksize int) bool {
 	}
 }
 
+func encryptionOracle(ciphertext, key []byte, blocksize int){
+	controlledString := strings.Repeat("A", blocksize - 1)
+	AES_128_ECB_Encrypt(ciphertext)
+}
+
 // Byte-at-a-time ECB decryption (Simple)
 func main(){
 	//key := generateRandomBytes(16)
@@ -134,4 +139,6 @@ func main(){
 	blockSize := detectBlockSize(cipherText, key)
 
 	fmt.Println(detectECB(cipherText, key, blockSize))
+
+	encryptionOracle()
 }
