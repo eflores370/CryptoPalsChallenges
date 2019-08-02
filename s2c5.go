@@ -18,8 +18,19 @@ func parseCookie(cookies string) {
 	fmt.Println(string(jsonObject))
 }
 
+func profile_for(email string) (cookie string) {
+	cookieMap := map[string]string{"email": email, "uid": "10", "role":"user"}
+	
+	//fmt.Println(cookieMap)
+	for key,v := range cookieMap {
+		cookie += key+"="+v+"&"
+	}
+
+	return cookie[:len(cookie)-1]
+}
+
 func main(){
 	cookies := "foo=bar&baz=qux&zap=zazzle"
-
 	parseCookie(cookies)
+	fmt.Println(profile_for("foo@bar.com"))
 }
