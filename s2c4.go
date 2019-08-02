@@ -2,39 +2,12 @@ package main
 
 import (
 	"crypto/aes"
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"strings"
-	//"strings"
 )
-
-// Byte-at-a-time ECB decryption (Simple)
-
-func generateRandomBytes(length int) (key []byte) {
-
-	key = make([]byte, length)
-	_, err := rand.Read(key)
-
-	if err != nil {
-		return nil
-	}
-
-	return key
-}
-
-func ECBEncryption(plaintext, key []byte) (ciphertext []byte) {
-	ciphertext = make([]byte, len(plaintext))
-	cipher, _ := aes.NewCipher(key)
-	size := 16
-
-	for blockStart, blockEnd := 0, size; blockStart < len(plaintext); blockStart, blockEnd = blockStart+size, blockEnd+size {
-		cipher.Encrypt(ciphertext[blockStart:blockEnd], plaintext[blockStart:blockEnd])
-	}
-
-	return ciphertext
-}
 
 func padding(unpaddedBytes []byte, totalLength int) (bytes []byte) {
 
@@ -49,81 +22,139 @@ func padding(unpaddedBytes []byte, totalLength int) (bytes []byte) {
 	return bytes
 }
 
-func oracle(input string, rawBytes, key []byte) []byte {
-
-	bytes := []byte(input)
-	bytes = append(bytes, rawBytes...)
-	encryptedString := ECBEncryption(padding(bytes, 16), key)
-
-	return encryptedString
-
-}
-
-func discoverBlockSize(decoded, key []byte) int {
-
-	currentSize := 0
-	previousSize := 0
-	counter := 0
-	blocksize := 0
-
-	for i := 0; i < 50; i++ {
-		input := strings.Repeat("A", i)
-		encryptedString := oracle(input, decoded, key)
-		currentSize = len(encryptedString)
-		if i != 0 {
-			if currentSize != previousSize {
-				counter++
-				if counter == 2 {
-					break
-				}
-			}
-			if counter == 1 {
-				blocksize++
-			}
-		}
-		previousSize = currentSize
+func XOR(rawBytes []byte, key []byte) []byte {
+	for i := range rawBytes {
+		rawBytes[i] ^= key[i%len(key)]
 	}
-	return blocksize
-
+	return rawBytes
 }
 
-func countRepeatingBlocks(ciphertext, key []byte) (counter int) {
-	size := discoverBlockSize(ciphertext, key)
+//func AES_128_CBC_Encrypt(plaintext string, key []byte) (ciphertext []byte) {
+//	paddedPlainText := padding([]byte(plaintext), aes.Blocksize)
+//	ciphertext = make([]byte, len(paddedPlainText))
+//
+//	cipher, _ := aes.NewCipher(key)
+//	//iv := generateRandomBytes(16)
+//	iv := []byte("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15")
+//
+//	for blockstart := 0; blockstart < len(plaintext); blockstart += aes.BlockSize {
+//		blockend := blockstart + aes.BlockSize
+//		copy(paddedPlainText[blockstart:blockend],XOR(paddedPlainText[blockstart:blockend], iv))
+//		cipher.Encrypt(ciphertext[blockstart:blockend], paddedPlainText[blockstart:blockend])
+//		iv = ciphertext[blockstart:blockend]
+//	}
+//	return ciphertext
+//
+//}
 
+func AES_128_ECB_Encrypt(plaintext, key []byte) (ciphertext []byte) {
+	paddedPlainText := padding([]byte(plaintext), aes.BlockSize)
+	ciphertext = make([]byte, len(paddedPlainText))
+
+	cipher, _ := aes.NewCipher(key)
+	for blockstart := 0; blockstart < len(paddedPlainText); blockstart += aes.BlockSize {
+		blockend := blockstart + aes.BlockSize
+		cipher.Encrypt(ciphertext[blockstart:blockend], paddedPlainText[blockstart:blockend])
+	}
+
+	return ciphertext
+}
+
+func generateRandomBytes(length int) (key []byte) {
+
+	key = make([]byte, length)
+	_, err := rand.Read(key)
+
+	if err != nil {
+		return nil
+	}
+
+	return key
+}
+
+func detectBlockSize(ciphertext, key []byte) (length int) {
+	currentBlockSize := len(AES_128_ECB_Encrypt(ciphertext, key))
+	for i := 0; i < 50; i++ {
+		stringA := strings.Repeat("A", i)
+		tmpArray := make([]byte, 0)
+		tmpArray = append(tmpArray, stringA...)
+		tmpArray = append(tmpArray, ciphertext...)
+		if currentBlockSize != len(AES_128_ECB_Encrypt(tmpArray, key)) {
+			return len(AES_128_ECB_Encrypt(tmpArray, key)) - currentBlockSize
+		}
+
+	}
+	return 0
+}
+
+func detectECB(cipherText []byte, blocksize int) bool {
+
+	counter := 0
 	cipherBlocks := make([][]byte, 0)
 
-	for blockStart, blockEnd := 0, size; blockStart < len(ciphertext); blockStart, blockEnd = blockStart+size, blockEnd+size {
+	for blockStart := 0; blockStart < len(cipherText); blockStart += blocksize {
+		blockEnd := blockStart + blocksize
 		if len(cipherBlocks) == 0 {
-			cipherBlocks = append(cipherBlocks, ciphertext[blockStart:blockEnd])
+			cipherBlocks = append(cipherBlocks, cipherText[blockStart:blockEnd])
 			continue
 		}
 		for i := range cipherBlocks {
-			if reflect.DeepEqual(cipherBlocks[i], ciphertext[blockStart:blockEnd]) {
+			if reflect.DeepEqual(cipherBlocks[i], cipherText[blockStart:blockEnd]) {
 				counter++
 			} else {
-				cipherBlocks = append(cipherBlocks, ciphertext[blockStart:blockEnd])
+				cipherBlocks = append(cipherBlocks, cipherText[blockStart:blockEnd])
 			}
 		}
 	}
-	return counter
-}
 
-func isECB(rawBytes, key []byte) bool {
-	encryptedString := ECBEncryption(rawBytes, key)
-	if countRepeatingBlocks(encryptedString, key) > 0 {
+	if counter > 0 {
 		return true
 	} else {
 		return false
 	}
 }
 
+func encryptionOracle(decodedString, key []byte, blocksize int) (plaintext string) {
+	lookupTable := make(map[int][]byte)
+
+	for i := 0; i < 255; i++ {
+		controlledString := strings.Repeat("A", blocksize-1)
+		controlledString += string(i)
+		encryptedString := AES_128_ECB_Encrypt([]byte(controlledString), key)
+		lookupTable[i] = encryptedString
+	}
+
+	for i := range decodedString {
+		controlledString := strings.Repeat("A", blocksize-1)
+		controlledString += string(decodedString[i])
+		encryptedString := AES_128_ECB_Encrypt([]byte(controlledString), key)
+		for index, value := range lookupTable {
+			if reflect.DeepEqual(encryptedString[0:blocksize], value[0:blocksize]) {
+				plaintext += string(index)
+			}
+		}
+	}
+
+	return plaintext
+
+}
+
+// Byte-at-a-time ECB decryption (Simple)
 func main() {
-
 	key := generateRandomBytes(16)
-	const secret = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
-	decoded, _ := base64.StdEncoding.DecodeString(secret)
+	unknownString := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
 
-	fmt.Print("blocksize", discoverBlockSize(decoded, key))
-	fmt.Print(isECB(padding(decoded, 16), key))
+	// Decode string and append it to controlled string
+	decodedString, _ := base64.StdEncoding.DecodeString(unknownString)
 
+	// Encryption Setup
+	cipherText := AES_128_ECB_Encrypt(decodedString, key)
+
+	// Detect Blocksize of the encryption
+	blockSize := detectBlockSize(cipherText, key)
+
+	detectECB(cipherText, blockSize)
+
+	plaintext := encryptionOracle(decodedString, key, blockSize)
+	fmt.Println(plaintext)
 }
